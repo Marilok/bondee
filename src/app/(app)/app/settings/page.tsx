@@ -3,9 +3,10 @@ import { IconSettings } from "@tabler/icons-react";
 import { redirect } from "next/navigation";
 import { ProfileCard } from "./components/ProfileCard";
 import { DataManagementCard } from "./components/DataManagementCard";
+import { getBaseUrl } from "@/lib/config";
 
 export default async function SettingsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+  const baseUrl = getBaseUrl();
 
   const response = await fetch(`${baseUrl}/api/account`, {
     cache: "no-store",

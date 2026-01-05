@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { verifyAuthentication } from "@/lib/api/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getBaseUrl } from "@/lib/config";
 
 export async function GET() {
   try {
@@ -113,7 +114,7 @@ export async function DELETE() {
       );
     }
 
-    return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_URL));
+    return NextResponse.redirect(new URL("/", getBaseUrl()));
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error", description: String(error) },
