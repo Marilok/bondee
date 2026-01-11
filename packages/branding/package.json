@@ -11,7 +11,8 @@
     },
     "./icon-generator": {
       "import": "./scripts/generate-icons.ts",
-      "require": "./scripts/generate-icons.ts"
+      "require": "./scripts/generate-icons.ts",
+      "types": "./scripts/icon-generator.d.ts"
     },
     "./icons": {
       "import": "./src/react/index.ts",
