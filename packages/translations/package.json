@@ -1,0 +1,23 @@
+{
+  "name": "@bondee/translations",
+  "version": "0.0.1",
+  "description": "Bondee internationalization translations",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    },
+    "./cs": "./src/cs.json",
+    "./en": "./src/en.json"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "translations",
+    "i18n",
+    "intl"
+  ]
+}
