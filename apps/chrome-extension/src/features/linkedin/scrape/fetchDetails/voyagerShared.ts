@@ -191,13 +191,16 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   extLog.debug(`[linkedin][fetchDetails] Voyager API: ${url}`);
 
   try {
+    // Isolated-world fetch is `chrome-extension://…` origin. `same-origin`
+    // omits LinkedIn cookies; `include` + host_permissions sends them.
     const response = await fetch(url, {
-      credentials: "same-origin",
+      credentials: "include",
       headers: {
         accept: "application/vnd.linkedin.normalized+json+2.1",
         "csrf-token": csrfToken,
         "x-restli-protocol-version": "2.0.0",
       },
+      referrer: location.href,
     });
 
     if (!response.ok) {

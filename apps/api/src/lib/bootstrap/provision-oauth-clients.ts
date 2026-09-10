@@ -7,7 +7,8 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@bondery/db";
 import { generateId } from "@bondery/helpers/ids";
-import { OAUTH_PROVIDER_SCOPES, resolveApiResourceIdentifier } from "../auth/index.js";
+import { OAUTH_PROVIDER_SCOPES, resolveApiResourceIdentifiers } from "../auth/index.js";
+import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
 
 export function hashOAuthClientSecret(secret: string): string {
   return createHash("sha256").update(Buffer.from(secret, "utf8")).digest("base64url");
@@ -26,7 +27,7 @@ function resolveExtensionRedirectUris(): string[] {
   if (!extensionId) {
     throw new Error("BONDERY_INFRA_CHROME_EXTENSION_ID is not set");
   }
-  return [`https://${extensionId}.chromiumapp.org/`];
+  return chromeExtensionRedirectUris(extensionId);
 }
 
 async function upsertResourceLink(clientId: string, resourceId: string): Promise<void> {
@@ -58,7 +59,11 @@ function resolveWebappRedirectUris(): string[] {
   return [...uris];
 }
 
-export async function provisionWebappClient(resourceId: string): Promise<void> {
+function resourceIdList(resourceId: string | readonly string[]): string[] {
+  return typeof resourceId === "string" ? [resourceId] : [...resourceId];
+}
+
+export async function provisionWebappClient(resourceId: string | readonly string[]): Promise<void> {
   const clientId = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID?.trim();
   const clientSecret = process.env.BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET?.trim();
   if (!clientId || !clientSecret) {
@@ -105,13 +110,18 @@ export async function provisionWebappClient(resourceId: string): Promise<void> {
     where: { clientId },
   });
 
-  await upsertResourceLink(clientId, resourceId);
+  const resourceIds = resourceIdList(resourceId);
+  for (const id of resourceIds) {
+    await upsertResourceLink(clientId, id);
+  }
   console.log(
-    `Provisioned webapp OAuth client ${clientId} (redirect_uris: ${redirectUris.join(", ")})`,
+    `Provisioned webapp OAuth client ${clientId} (redirect_uris: ${redirectUris.join(", ")}; resources: ${resourceIds.join(", ")})`,
   );
 }
 
-export async function provisionExtensionClient(resourceId: string): Promise<void> {
+export async function provisionExtensionClient(
+  resourceId: string | readonly string[],
+): Promise<void> {
   const clientId = process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID?.trim();
   if (!clientId) {
     throw new Error("BONDERY_PUBLIC_OAUTH_CLIENT_ID is not set");
@@ -150,37 +160,44 @@ export async function provisionExtensionClient(resourceId: string): Promise<void
     where: { clientId },
   });
 
-  await upsertResourceLink(clientId, resourceId);
+  const resourceIds = resourceIdList(resourceId);
+  for (const id of resourceIds) {
+    await upsertResourceLink(clientId, id);
+  }
   console.log(
-    `Provisioned extension OAuth client ${clientId} (redirect_uris: ${redirectUris.join(", ")})`,
+    `Provisioned extension OAuth client ${clientId} (redirect_uris: ${redirectUris.join(", ")}; resources: ${resourceIds.join(", ")})`,
   );
 }
 
 export async function resolveResourceId(): Promise<string> {
-  const identifier = resolveApiResourceIdentifier();
-  if (!identifier) {
+  const identifiers = resolveApiResourceIdentifiers();
+  const canonical = identifiers[0];
+  if (!canonical) {
     throw new Error("BONDERY_PUBLIC_API_URL is not set");
   }
 
-  await prisma.oauthResource.upsert({
-    create: {
-      allowedScopes: [...OAUTH_PROVIDER_SCOPES],
-      id: generateId(),
-      identifier,
-      name: "Bondery API",
-    },
-    update: {
-      allowedScopes: [...OAUTH_PROVIDER_SCOPES],
-      disabled: false,
-    },
-    where: { identifier },
-  });
+  for (const identifier of identifiers) {
+    await prisma.oauthResource.upsert({
+      create: {
+        allowedScopes: [...OAUTH_PROVIDER_SCOPES],
+        id: generateId(),
+        identifier,
+        name: "Bondery API",
+      },
+      update: {
+        allowedScopes: [...OAUTH_PROVIDER_SCOPES],
+        disabled: false,
+      },
+      where: { identifier },
+    });
+  }
 
-  return identifier;
+  return canonical;
 }
 
 export async function provisionOAuthClients(): Promise<void> {
-  const resourceId = await resolveResourceId();
-  await provisionWebappClient(resourceId);
-  await provisionExtensionClient(resourceId);
+  await resolveResourceId();
+  const resourceIds = resolveApiResourceIdentifiers();
+  await provisionWebappClient(resourceIds);
+  await provisionExtensionClient(resourceIds);
 }

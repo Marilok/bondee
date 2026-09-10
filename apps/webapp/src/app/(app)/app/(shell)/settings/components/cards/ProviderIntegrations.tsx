@@ -1,6 +1,6 @@
 "use client";
 
-import { getUserFacingError } from "@bondery/helpers/api";
+import { getAuthUserFacingError } from "@bondery/helpers/api";
 import { isOAuthProviderEnabled } from "@bondery/helpers/auth/oauth-providers";
 import {
   errorNotificationTemplate,
@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { betterAuthUnlinkAccountId } from "@/lib/auth/better-auth-unlink-account-id";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -118,7 +119,7 @@ export function ProviderIntegrations({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          description: getUserFacingError(error, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: tCommon("feedback.errorTitle"),
         }),
       );
@@ -170,14 +171,14 @@ export function ProviderIntegrations({
 
       const authClient = createWebappAuthClient();
 
-      // Better Auth 1.7's unlink-account endpoint takes only `accountId`
-      // (the account row id) — `providerId` was dropped from the request.
+      // Better Auth 1.7 unlinkAccount.accountId is the local Account.id
+      // (identity.id), not providerAccountId (identity.identity_id).
       const { error } = await authClient.unlinkAccount({
-        accountId: targetIdentity.identity_id,
+        accountId: betterAuthUnlinkAccountId(targetIdentity),
       });
 
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
       setProviders((prev) => prev.filter((p) => p !== provider && p !== providerKeyFor(provider)));
@@ -191,7 +192,7 @@ export function ProviderIntegrations({
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getUserFacingError(error, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: tCommon("feedback.errorTitle"),
         }),
       );

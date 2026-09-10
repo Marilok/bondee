@@ -69,4 +69,8 @@ BONDERY_PUBLIC_WEBAPP_URL=http://localhost:26632
 BONDERY_PUBLIC_OAUTH_CLIENT_ID=...
 ```
 
-OAuth scopes: `openid profile email offline_access api:access` with `resource` = `BONDERY_PUBLIC_API_URL`.
+OAuth scopes: `openid profile email offline_access api:access`. The RFC 8707 `resource` parameter must equal `BONDERY_PUBLIC_API_URL` (usually `http://localhost:26631`). Authorize and token HTTP URLs may use `127.0.0.1` so Chrome does not hit IPv6 `::1`. Do not rewrite `resource` to `127.0.0.1` — the authorization server matches that identifier exactly. Provisioning also registers the loopback alias so a mismatched local build still authorizes.
+
+Token exchange is a cross-origin `fetch` from `chrome-extension://<id>` to `127.0.0.1`. The API must reflect that origin in CORS (`BONDERY_INFRA_CHROME_EXTENSION_ID`), and the unpacked manifest must include `http://127.0.0.1:<api-port>/*` in `host_permissions`. WXT adds the loopback alias automatically. After pulling, restart the API and **Reload** the unpacked extension, then sign in again.
+
+A 200 from `POST /auth/oauth2/token` with **Failed to exchange code for tokens** in the popup is this CORS/host-permission mismatch — the browser hid the body.

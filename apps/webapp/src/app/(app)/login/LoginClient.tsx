@@ -10,7 +10,7 @@ import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { buildLoginMagicLinkUrls } from "@/lib/auth/magic-link-urls";
 import { notifyPasskeyLoginError } from "@/lib/auth/notify-passkey-login-error";
-import { RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
+import { parseReturnIntent, RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 import { type LoginBusyAction, SocialLoginCard } from "./components/SocialLoginCard";
@@ -29,11 +29,16 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
   const searchParams = useSearchParams();
   const { websiteUrl } = runtimeConfig;
 
-  const redirectParam = searchParams.get(RETURN_INTENT_PARAM);
-  const magicLinkUrls = buildLoginMagicLinkUrls(
-    typeof window === "undefined" ? runtimeConfig.webappUrl : window.location.origin,
-    redirectParam,
-  );
+  const redirectParam = parseReturnIntent(searchParams);
+  const origin = typeof window === "undefined" ? runtimeConfig.webappUrl : window.location.origin;
+  const magicLinkUrls = buildLoginMagicLinkUrls(origin, redirectParam);
+  const postLoginCallbackUrl = useMemo(() => {
+    const startUrl = new URL("/auth/start", origin);
+    if (redirectParam) {
+      startUrl.searchParams.set(RETURN_INTENT_PARAM, redirectParam);
+    }
+    return startUrl.toString();
+  }, [origin, redirectParam]);
 
   const handleOAuthLogin = async (provider: "github" | "linkedin") => {
     try {
@@ -43,20 +48,10 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
       // Establish the API's native Better Auth session via social sign-in
       // first, then resume the webapp's OAuth-BFF exchange. Starting at
       // /auth/start without a native session stops on /oauth/login and forces
-      // a second provider click.
-      const callbackURL =
-        redirectParam?.startsWith("/oauth/consent") === true
-          ? new URL(redirectParam, window.location.origin).toString()
-          : (() => {
-              const startUrl = new URL("/auth/start", window.location.origin);
-              if (redirectParam) {
-                startUrl.searchParams.set(RETURN_INTENT_PARAM, redirectParam);
-              }
-              return startUrl.toString();
-            })();
-
+      // a second provider click. Authorization-server continuations belong on
+      // `/oauth/login`, not this page.
       const { error } = await authClient.signIn.social({
-        callbackURL,
+        callbackURL: postLoginCallbackUrl,
         provider,
       });
 
@@ -85,17 +80,6 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
       setBusyAction("passkey");
       await setLocalePreferencesCookie();
 
-      const callbackURL =
-        redirectParam?.startsWith("/oauth/consent") === true
-          ? new URL(redirectParam, window.location.origin).toString()
-          : (() => {
-              const startUrl = new URL("/auth/start", window.location.origin);
-              if (redirectParam) {
-                startUrl.searchParams.set(RETURN_INTENT_PARAM, redirectParam);
-              }
-              return startUrl.toString();
-            })();
-
       const { error } = await authClient.signIn.passkey();
 
       if (error) {
@@ -103,7 +87,7 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
         return;
       }
 
-      window.location.assign(callbackURL);
+      window.location.assign(postLoginCallbackUrl);
     } catch (err) {
       notifyPasskeyLoginError(err, t);
     } finally {

@@ -17,18 +17,14 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconShield, IconX } from "@tabler/icons-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createWebappAuthClient } from "@/lib/auth/client";
-import { RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
+import { buildOAuthLoginHref } from "@/lib/auth/magic-link-urls";
+import { resolveOAuthConsentRequestDetails } from "@/lib/auth/oauth-consent-request";
 import { buildSignedOAuthQuery } from "@/lib/auth/signedOAuthQuery";
 import { useOAuthConsentTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
-
-type OAuthClientDetails = {
-  client_name?: string;
-  client_id?: string;
-};
 
 function getRedirectUri(data: unknown): string | null {
   if (!data || typeof data !== "object") {
@@ -47,7 +43,6 @@ function getRedirectUri(data: unknown): string | null {
 export default function OAuthConsentPage() {
   const t = useOAuthConsentTranslations();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const runtimeConfig = useWebappRuntimeConfig();
   const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
   const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(/\/+$/, "");
@@ -84,35 +79,27 @@ export default function OAuthConsentPage() {
     try {
       const session = await authClient.getSession();
       if (!session.data?.user) {
+        // `/login` is the BFF gate: an existing webapp session goes to
+        // /app/home and drops the signed oauth_query. Stay on the AS door.
         redirectingRef.current = true;
-        const consentPath = `/oauth/consent?${searchParams.toString()}`;
-        router.push(`/login?${RETURN_INTENT_PARAM}=${encodeURIComponent(consentPath)}`);
+        window.location.replace(buildOAuthLoginHref(window.location.search));
         return;
       }
 
-      const clientId = searchParams.get("client_id");
-      if (!clientId) {
+      const request = resolveOAuthConsentRequestDetails(searchParams.toString());
+      if (!request) {
         setError(t("InvalidRequest"));
         setLoading(false);
         return;
       }
 
-      const clientResponse = await fetch(
-        `${apiBaseUrl}${BETTER_AUTH_BASE_PATH}/oauth2/get-client?client_id=${encodeURIComponent(clientId)}`,
-        { credentials: "include" },
-      );
-
-      if (!clientResponse.ok) {
-        setError(t("InvalidRequest"));
-        setLoading(false);
-        return;
-      }
-
-      const clientDetails = (await clientResponse.json()) as OAuthClientDetails;
+      // First-party clients have no userId; GET /oauth2/get-client is an
+      // owner lookup and 401s for the Chrome extension. The signed query
+      // already has client_id, redirect_uri, and scope.
       setAuthDetails({
-        client: { name: clientDetails.client_name ?? clientId },
-        redirect_uri: searchParams.get("redirect_uri") ?? "",
-        scope: searchParams.get("scope") ?? "",
+        client: { name: t("ChromeExtensionClientName") },
+        redirect_uri: request.redirectUri,
+        scope: request.scope,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : t("UnexpectedError"));
@@ -121,7 +108,7 @@ export default function OAuthConsentPage() {
         setLoading(false);
       }
     }
-  }, [apiBaseUrl, authClient, oauthQuery, router, searchParams, t]);
+  }, [authClient, oauthQuery, searchParams, t]);
 
   useEffect(() => {
     void fetchDetails();

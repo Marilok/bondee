@@ -1,4 +1,13 @@
 const LOCAL_DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const CHROME_EXTENSION_ID = /^[a-p]{32}$/;
+
+export function chromeExtensionOrigin(extensionId: string | undefined): string | undefined {
+  const id = extensionId?.trim();
+  if (!id || !CHROME_EXTENSION_ID.test(id)) {
+    return undefined;
+  }
+  return `chrome-extension://${id}`;
+}
 
 export function parseExtraAllowedOrigins(raw: string | undefined): string[] {
   if (!raw) {
@@ -15,6 +24,7 @@ export function resolveTrustedOrigins(options: {
   webappUrl?: string;
   websiteUrl?: string;
   extraAllowedOrigins?: string;
+  chromeExtensionId?: string;
   /** When true, allow any localhost / 127.0.0.1 port (Cursor port-forward, Expo, etc.). */
   allowLocalDevOrigins?: boolean;
 }): string[] {
@@ -22,6 +32,7 @@ export function resolveTrustedOrigins(options: {
     options.webappUrl?.replace(/\/+$/, ""),
     options.websiteUrl?.replace(/\/+$/, ""),
     "bondery://",
+    chromeExtensionOrigin(options.chromeExtensionId),
     ...parseExtraAllowedOrigins(options.extraAllowedOrigins),
   ].filter((value): value is string => Boolean(value));
 
@@ -80,6 +91,7 @@ function originMatchesWildcard(origin: string, pattern: string): boolean {
 export function resolveRuntimeTrustedOrigins(): string[] {
   return resolveTrustedOrigins({
     allowLocalDevOrigins: process.env.NODE_ENV !== "production",
+    chromeExtensionId: process.env.BONDERY_INFRA_CHROME_EXTENSION_ID,
     extraAllowedOrigins: process.env.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS,
     webappUrl: process.env.BONDERY_PUBLIC_WEBAPP_URL,
     websiteUrl: process.env.BONDERY_PUBLIC_WEBSITE_URL,

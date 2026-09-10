@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  chromeExtensionOrigin,
   isAllowedRequestOrigin,
   resolveTrustedOrigins,
   withCorsHeaders,
@@ -29,6 +30,22 @@ describe("resolveTrustedOrigins", () => {
 
     assert.ok(origins.includes("http://localhost:*"));
     assert.ok(origins.includes("http://127.0.0.1:*"));
+  });
+
+  it("allows the pinned Chrome extension origin for token CORS", () => {
+    const origins = resolveTrustedOrigins({
+      chromeExtensionId: "lpcmokfekjjejnpobhbkgmjkodfhpmha",
+      webappUrl: "https://app.example.com",
+    });
+
+    assert.ok(origins.includes("chrome-extension://lpcmokfekjjejnpobhbkgmjkodfhpmha"));
+  });
+});
+
+describe("chromeExtensionOrigin", () => {
+  it("rejects ids that are not a 32-character Chrome item id", () => {
+    assert.equal(chromeExtensionOrigin("not-an-id"), undefined);
+    assert.equal(chromeExtensionOrigin(""), undefined);
   });
 });
 
@@ -70,5 +87,27 @@ describe("withCorsHeaders", () => {
 
     assert.equal(corsResponse.headers.get("Access-Control-Allow-Origin"), "http://localhost:62128");
     assert.equal(corsResponse.headers.get("Access-Control-Allow-Credentials"), "true");
+  });
+
+  it("reflects the Chrome extension origin so PKCE token exchange can read a 200 body", () => {
+    const origins = resolveTrustedOrigins({
+      chromeExtensionId: "lpcmokfekjjejnpobhbkgmjkodfhpmha",
+      webappUrl: "http://localhost:26632",
+    });
+    const response = new Response(JSON.stringify({ access_token: "x" }), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    });
+
+    const corsResponse = withCorsHeaders(
+      { headers: { origin: "chrome-extension://lpcmokfekjjejnpobhbkgmjkodfhpmha" } },
+      response,
+      origins,
+    );
+
+    assert.equal(
+      corsResponse.headers.get("Access-Control-Allow-Origin"),
+      "chrome-extension://lpcmokfekjjejnpobhbkgmjkodfhpmha",
+    );
   });
 });

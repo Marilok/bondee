@@ -8,20 +8,21 @@ Mantine `Tooltip` on **webapp and website** only. Mobile does not use this compo
 
 - `multiline: true`
 - `withArrow: true`
-- `w: 300`
+- `w: "auto"`
+- `maw: 300`
 
-Do **not** pass `multiline`, `withArrow`, or `w` at the call site unless you need a different value.
+Do **not** pass `multiline`, `withArrow`, `w`, or `maw` at the call site unless you need a different value.
 
 ```tsx
 <Tooltip label={t("...")}>
 ```
 
-Override `w` when the default 300px is wrong — for example `PersonAvatarTooltip` (`w="auto"`) because the label is a `PersonCard`, not wrapping text.
+Override `maw` when the default 300px wrap is wrong. Override `w` only when the tooltip must not shrink-wrap (rare). `PersonAvatarTooltip` sets `w="auto"` and `maw="none"` because the label is a `PersonCard` (`minWidth: 300`), not wrapping text.
 
-`HelpButton` uses the theme width. Pass `tooltipMaxWidth` only to override `w`.
+`HelpButton` uses the theme max width. Pass `tooltipMaxWidth` only to override `maw`.
 
 ## Checklist
 
-- [ ] No `multiline`, `withArrow`, or `w` on `<Tooltip>` unless overriding the theme
-- [ ] Person-card / custom-label tooltips set `w="auto"` (or another explicit width)
+- [ ] No `multiline`, `withArrow`, `w`, or `maw` on `<Tooltip>` unless overriding the theme
+- [ ] Person-card / custom-label tooltips set `w="auto"` and `maw="none"` (or another explicit size)
 - [ ] `HelpButton` does not pass `withArrow`; `tooltipMaxWidth` only when the default 300px is too narrow

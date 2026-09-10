@@ -67,7 +67,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           enforceContrast: false,
         },
       ],
-      "react-native-enriched-markdown",
     ],
     scheme: "bondery",
     slug: "bondery",

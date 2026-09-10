@@ -17,7 +17,7 @@ Popup and welcome are not in a shadow root — they import Mantine CSS at their 
 
 Entrypoint: `entrypoints/linkedin.content/index.tsx`. Matches `https://www.linkedin.com/*`, `https://linkedin.com/*`, `https://*.linkedin.com/*`. `runAt: "document_start"`.
 
-**Scrape** (`features/linkedin/scrape/scrapeProfile.ts`): Voyager is primary (`fetchFullWorkHistory`, `fetchFullEducation`, `fetchProfileLocation`). SDUI/DOM is fallback (`extractSduiWorkHistory`, `extractSduiEducation`, `extractSduiIdentity`). Identity/bio still come from SDUI.
+**Scrape** (`features/linkedin/scrape/scrapeProfile.ts`): Voyager is primary (`fetchFullWorkHistory`, `fetchFullEducation`, `fetchProfileLocation`). SDUI/DOM is fallback (`extractSduiWorkHistory`, `extractSduiEducation`, `extractSduiIdentity`). Identity/bio still come from SDUI. Isolated-world `fetch` is `chrome-extension://…` origin — Voyager must use `credentials: "include"` (not `same-origin`) so `host_permissions` send `li_at` / `JSESSIONID`.
 
 **Button:** delayed inject (1.5s, retry 3s) so the action bar exists. SPA: poll `location.href` every 500ms, `clearStaleButtonIfNeeded`, re-inject after 1s. `MutationObserver` on `document.body` waits for `button.artdeco-button` or `data-control-name="message"` (locale-safe; do not rely on English `aria-label^='Message'` alone).
 

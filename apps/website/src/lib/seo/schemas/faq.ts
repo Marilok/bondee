@@ -8,7 +8,7 @@ export const FAQ_ITEMS = [
   },
   {
     answer:
-      "Yes. Bondery is free with all features unlocked for the beta phase. In the future, there will be a paid tier with additional features, but the core personal PRM functionality will remain free forever.",
+      "Yes. Bondery is free with all the core features. A premium version exists for additional features, but the core personal PRM functionality will remain free forever.",
     question: "Is Bondery free to use?",
   },
   {

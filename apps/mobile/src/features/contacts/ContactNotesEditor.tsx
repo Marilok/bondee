@@ -10,7 +10,11 @@ import { contactNotesUpdateSchema } from "@bondery/schemas";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
-import type { EnrichedMarkdownTextInputInstance, StyleState } from "react-native-enriched-markdown";
+import type {
+  EnrichedMarkdownTextInputInstance,
+  MarkdownTextInputStyle,
+  StyleState,
+} from "react-native-enriched-markdown";
 import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
 import { StackNavBar } from "../../components/chrome";
 import { updateContact } from "../../lib/domains/contacts";
@@ -265,8 +269,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
   }, [saveStatus, notesUpdatedAt]);
 
   const markdownStyle = useMemo(
-    () => ({
-      code: { backgroundColor: colors.surfacePressed },
+    (): MarkdownTextInputStyle => ({
       em: { color: colors.textPrimary },
       link: { color: colors.primary },
       linkVariants: {
@@ -276,8 +279,6 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
           underline: false,
         },
       },
-      list: { color: colors.textPrimary, fontSize: 16 },
-      paragraph: { color: colors.textPrimary, fontSize: 16, lineHeight: 24 },
       strong: { color: colors.textPrimary },
     }),
     [colors],

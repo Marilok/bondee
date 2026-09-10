@@ -25,6 +25,7 @@ On first API start in development, `runDevelopmentBootstrap()` runs the same pip
 | Tool | Version | Notes |
 |---|---|---|
 | [Node.js](https://nodejs.org/) | 26 | Declared in root `package.json` `devEngines.runtime` (pnpm downloads on install); `.nvmrc` is optional for `nvm use` / `fnm use` |
+| [pnpm](https://pnpm.io/installation) | ≥ 12.4.0 | Declared in root `package.json` `packageManager` / `engines.pnpm`. Install it yourself — the lockfile does not download pnpm (`pmOnFail: ignore`). |
 | [npm](https://www.npmjs.com/) | ≥ 11 | Bundled with Node.js |
 | [Docker](https://www.docker.com/) | latest | Local Postgres, Redis, and SeaweedFS |
 

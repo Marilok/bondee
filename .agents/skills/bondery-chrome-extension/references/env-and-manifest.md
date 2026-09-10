@@ -18,7 +18,7 @@ Vite `envPrefix`: `BONDERY_PUBLIC_`, `WXT_` (framework, e.g. `WXT_DEBUG`). Do no
 
 ## `host_permissions` (computed)
 
-Built from Instagram + LinkedIn URL patterns plus `getOrigin(BONDERY_PUBLIC_WEBAPP_URL)` and, when different, `getOrigin(BONDERY_PUBLIC_API_URL)`. Changing env origins changes the packed host list on the next build.
+Built from Instagram + LinkedIn URL patterns plus `loopbackHostPermissionPatterns(BONDERY_PUBLIC_WEBAPP_URL)` and, when different, the same helper for `BONDERY_PUBLIC_API_URL`. Local `localhost` origins also get the `127.0.0.1` alias (token/authorize fetches pin loopback HTTP to IPv4). Changing env origins changes the packed host list on the next build.
 
 ## Content-script matches (not computed)
 

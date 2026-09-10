@@ -183,6 +183,7 @@ export default interface Resources {
       "apiTemporarilyUnavailable": "The API is temporarily unavailable. Please try again.",
       "apiUnreachable": "Can't reach the Bondery server. Try again in a moment.",
       "auth": {
+        "ACCOUNT_NOT_FOUND": "We couldn’t find that linked account. Refresh the page and try again.",
         "AUTHENTICATION_FAILED": "Couldn’t sign in with your passkey. Try again, or continue with email, GitHub, or LinkedIn.",
         "CHALLENGE_NOT_FOUND": "Couldn’t complete passkey sign-in. Try again.",
         "CREDENTIAL_ACCOUNT_NOT_FOUND": "No password sign-in found for this account.",
@@ -199,7 +200,7 @@ export default interface Resources {
         "PASSKEY_NOT_FOUND": "No passkey found. Continue with email, GitHub, or LinkedIn, then add a passkey in Settings.",
         "PREVIOUSLY_REGISTERED": "This passkey is already added to your account.",
         "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
-        "SESSION_NOT_FRESH": "Your session is too old to add a passkey. Sign in again with GitHub or LinkedIn, then try again.",
+        "SESSION_NOT_FRESH": "Your session is too old for this action. Sign in again, then try again.",
         "SESSION_REQUIRED": "Sign in again with GitHub or LinkedIn, then add a passkey.",
         "SOCIAL_ACCOUNT_ALREADY_LINKED": "This social account is already linked to another user.",
         "TOKEN_EXPIRED": "This sign-in link has expired. Request a new one.",
@@ -921,6 +922,7 @@ export default interface Resources {
   },
   "features/pages/OAuthConsent": {
     "Approve": "Approve",
+    "ChromeExtensionClientName": "Bondery Chrome Extension",
     "Deny": "Deny",
     "Description": "{clientName} is requesting access to your Bondery account.",
     "ErrorTitle": "Authorization Error",

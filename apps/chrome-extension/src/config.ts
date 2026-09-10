@@ -11,6 +11,8 @@
  * Framework vars like WXT_DEBUG remain on the WXT_ prefix.
  */
 
+import { oauthHttpBaseUrl, oauthResourceIdentifier } from "./lib/auth/oauth-urls";
+
 export const OAUTH_SCOPE = "openid profile email offline_access api:access";
 
 export const config = {
@@ -22,19 +24,15 @@ export const config = {
   oauthClientId: import.meta.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
 } as const;
 
-/** Normalize loopback hostnames for OAuth issuer/resource consistency. */
-export function normalizeOAuthBaseUrl(url: string): string {
-  return url.replace("http://localhost:", "http://127.0.0.1:").replace(/\/+$/, "");
-}
-
+/** RFC 8707 resource — must match the provisioned API identifier, not the 127.0.0.1 fetch URL. */
 export function getOAuthResource(): string {
-  return normalizeOAuthBaseUrl(config.apiUrl);
+  return oauthResourceIdentifier(config.apiUrl);
 }
 
 export function getOAuthTokenUrl(): string {
-  return `${normalizeOAuthBaseUrl(config.apiUrl)}/auth/oauth2/token`;
+  return `${oauthHttpBaseUrl(config.apiUrl)}/auth/oauth2/token`;
 }
 
 export function getOAuthAuthorizeUrl(): string {
-  return `${normalizeOAuthBaseUrl(config.apiUrl)}/auth/oauth2/authorize`;
+  return `${oauthHttpBaseUrl(config.apiUrl)}/auth/oauth2/authorize`;
 }

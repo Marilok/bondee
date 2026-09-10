@@ -129,8 +129,9 @@ export const bonderyTheme = createTheme({
     },
     Tooltip: {
       defaultProps: {
+        maw: 300,
         multiline: true,
-        w: 300,
+        w: "auto",
         withArrow: true,
       },
     },
