@@ -80,7 +80,7 @@ Workflows fetch production secrets with `infisical-production-secrets`. Empty we
 
 **Verify path filters:** `website-build` runs when marketing-site paths change. `contract` always runs. API HTTP integration (`test:api`) is not in CI; run manually when changing routes if needed. Auth integration (`pnpm --filter api run test:auth`) is local-only until the suite is repaired.
 
-Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages copy pruned manifests and sources, then run a single `pnpm install --no-runtime` with a BuildKit cache mount for the pnpm store (`id=bondery-pnpm-store-v3`). A second frozen install in the same tree fails on pnpm 12 (`missing snapshot for node@runtime`). `--no-runtime` skips `devEngines.runtime` (Node is already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
+Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages copy pruned manifests and sources, then run a single `pnpm install --no-runtime` with a BuildKit cache mount for the pnpm store (`id=bondery-pnpm-store-v3`). The lockfile does not record `devEngines.runtime` (`runtime: false`); a second frozen install or `pnpm prune --prod` against a turbo-prune lockfile otherwise fails with `missing snapshot for node@runtime`. `--no-runtime` skips downloading Node (already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
 
 ## Docker channels
 

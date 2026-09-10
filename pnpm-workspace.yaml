@@ -8,6 +8,10 @@ packages:
 # https://pnpm.io/lockfile
 pmOnFail: ignore
 verifyDepsBeforeRun: false
+# Node comes from nvm/.nvmrc, pnpm/setup, and Docker node:26-slim.
+# Recording `node@runtime` in the lockfile breaks turbo-prune then `pnpm prune`.
+runtime: false
+runtimeOnFail: ignore
 
 nodeLinker: hoisted
 autoInstallPeers: true
