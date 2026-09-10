@@ -1,5 +1,6 @@
 {
   "Approve": "Schválit",
+  "ChromeExtensionClientName": "Rozšíření Bondery pro Chrome",
   "Deny": "Zamítnout",
   "Description": "{clientName} žádá o přístup k vašemu účtu Bondery.",
   "ErrorTitle": "Chyba autorizace",

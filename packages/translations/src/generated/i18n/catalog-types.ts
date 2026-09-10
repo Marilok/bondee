@@ -299,10 +299,12 @@ export type CommonCatalog = {
     apiTemporarilyUnavailable: string;
     apiUnreachable: string;
     auth: {
+      ACCOUNT_NOT_FOUND: string;
       AUTHENTICATION_FAILED: string;
       CHALLENGE_NOT_FOUND: string;
       CREDENTIAL_ACCOUNT_NOT_FOUND: string;
       EMAIL_NOT_VERIFIED: string;
+      EMAIL_SEND_FAILED: string;
       FAILED_TO_CREATE_SESSION: string;
       FAILED_TO_CREATE_USER: string;
       FAILED_TO_UPDATE_PASSKEY: string;
@@ -321,7 +323,6 @@ export type CommonCatalog = {
       SOCIAL_ACCOUNT_ALREADY_LINKED: string;
       TOKEN_EXPIRED: string;
       TOO_MANY_REQUESTS: string;
-      EMAIL_SEND_FAILED: string;
       UNABLE_TO_CREATE_SESSION: string;
       USER_NOT_FOUND: string;
       YOU_ARE_NOT_ALLOWED_TO_REGISTER_THIS_PASSKEY: string;
@@ -1792,6 +1793,7 @@ export type NotFoundPageCatalog = {
 
 export type OAuthConsentCatalog = {
   Approve: string;
+  ChromeExtensionClientName: string;
   Deny: string;
   Description: string;
   ErrorTitle: string;

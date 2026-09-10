@@ -71,8 +71,7 @@ describe("magic-link auth", () => {
 
   before(async () => {
     app = await createTestApp();
-    await provisionWebappClient();
-    await resolveResourceId();
+    await provisionWebappClient(await resolveResourceId());
   });
 
   afterEach(() => {

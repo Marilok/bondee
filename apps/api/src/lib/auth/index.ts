@@ -39,6 +39,7 @@ import { jwt } from "better-auth/plugins/jwt";
 import { resolveRuntimeTrustedOrigins } from "../platform/trusted-origins.js";
 import { buildAuthTranslations } from "./build-auth-translations.js";
 import { isPlatformAdmin } from "./is-platform-admin.js";
+import { withLoopbackUrlAlias } from "./loopback-alias-urls.js";
 import { MAGIC_LINK_BA_RATE_LIMIT, MAGIC_LINK_EXPIRES_IN_SECONDS } from "./magic-link-constants.js";
 import { resolveNewUserDisplayName } from "./new-user-name.js";
 import { oauthSocialProviders } from "./oauth-provider-config.js";
@@ -68,16 +69,27 @@ function resolveWebappUrl(): string {
 }
 
 /**
- * The one canonical protected-resource identifier for this API, per RFC 8707.
- * All first-party clients (webapp BFF, chrome-extension) must request this
- * exact `resource` value — 1.7's `enforcePerClientResources` (on by default)
- * additionally requires each client to be explicitly linked to it via
- * `oauthClientResource` (see scripts/provision-oauth-clients.ts). Widening or
- * omitting the resource fails closed instead of falling back to a legacy
- * unscoped/opaque token.
+ * Canonical protected-resource identifier for this API, per RFC 8707
+ * (`BONDERY_PUBLIC_API_URL`). First-party clients should request this exact
+ * `resource` value. `enforcePerClientResources` also requires a client link
+ * via `oauthClientResource` (see scripts/provision-oauth-clients.ts).
  */
 export function resolveApiResourceIdentifier(): string {
   return (process.env.BONDERY_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
+}
+
+/**
+ * Canonical identifier plus the localhost ↔ 127.0.0.1 alias used by Chrome
+ * identity and Node IPv4 fetches. Production hosts are a single-element list.
+ */
+export function resolveApiResourceIdentifiers(): string[] {
+  return withLoopbackUrlAlias(resolveApiResourceIdentifier());
+}
+
+/** JWT `aud` check: string in production, both loopback aliases locally. */
+export function resolveApiResourceAudience(): string | string[] {
+  const identifiers = resolveApiResourceIdentifiers();
+  return identifiers.length === 1 ? (identifiers[0] ?? "") : identifiers;
 }
 
 export const API_ACCESS_SCOPE = "api:access";
@@ -333,18 +345,14 @@ export const auth = betterAuth({
       // (resourceSeedMode defaults to "insertOnly"). The actual
       // client -> resource links are created by
       // scripts/provision-oauth-clients.ts, which also owns the client rows.
-      resources: resolveApiResourceIdentifier()
-        ? [
-            {
-              // oauth-provider intersects requested scopes with each resource's
-              // allowedScopes. OIDC scopes must survive that intersection for
-              // the token endpoint to issue an ID token and permit UserInfo.
-              allowedScopes: [...OAUTH_PROVIDER_SCOPES],
-              identifier: resolveApiResourceIdentifier(),
-              name: "Bondery API",
-            },
-          ]
-        : [],
+      resources: resolveApiResourceIdentifiers().map((identifier) => ({
+        // oauth-provider intersects requested scopes with each resource's
+        // allowedScopes. OIDC scopes must survive that intersection for
+        // the token endpoint to issue an ID token and permit UserInfo.
+        allowedScopes: [...OAUTH_PROVIDER_SCOPES],
+        identifier,
+        name: "Bondery API",
+      })),
       scopes: [...OAUTH_PROVIDER_SCOPES],
     }),
     apiKey({

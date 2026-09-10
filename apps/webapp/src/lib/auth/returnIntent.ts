@@ -21,10 +21,6 @@ type SearchParamsLike = {
   get(name: string): string | null;
 };
 
-function isOAuthConsentReturnPath(path: string): boolean {
-  return path.startsWith("/oauth/consent");
-}
-
 export function buildPathWithSearch(pathname: string, search?: string | null): string {
   if (!search) {
     return pathname;
@@ -40,10 +36,6 @@ export function isSafeReturnPath(path: string | null | undefined): path is strin
 
   if (path.startsWith("//") || path.includes("://")) {
     return false;
-  }
-
-  if (isOAuthConsentReturnPath(path)) {
-    return true;
   }
 
   if (!path.startsWith("/app/")) {
@@ -127,10 +119,6 @@ export function getRequestReturnPathForLogin(headersList: {
 
 export function shouldBypassOnboardingForReturnPath(path: string | null): path is string {
   if (!isSafeReturnPath(path)) {
-    return false;
-  }
-
-  if (isOAuthConsentReturnPath(path)) {
     return false;
   }
 

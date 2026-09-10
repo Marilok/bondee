@@ -1,3 +1,5 @@
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+
 /** Same value as `RETURN_INTENT_PARAM` in `returnIntent.ts`. */
 const RETURN_INTENT_PARAM = "redirect";
 
@@ -41,15 +43,7 @@ export function buildLoginMagicLinkUrls(
   origin: string,
   redirectParam: string | null,
 ): { callbackURL: string; errorCallbackURL: string } {
-  const errorCallbackURL = new URL("/login", origin).toString();
-
-  if (redirectParam?.startsWith("/oauth/consent") === true) {
-    return {
-      callbackURL: new URL(redirectParam, origin).toString(),
-      errorCallbackURL,
-    };
-  }
-
+  const errorCallbackURL = new URL(WEBAPP_ROUTES.LOGIN, origin).toString();
   const startUrl = new URL("/auth/start", origin);
   if (redirectParam) {
     startUrl.searchParams.set(RETURN_INTENT_PARAM, redirectParam);
@@ -61,13 +55,22 @@ export function buildLoginMagicLinkUrls(
   };
 }
 
+/** AS login continuation — keep the signed search byte-for-byte, including `?`. */
+export function buildOAuthLoginHref(search: string): string {
+  if (!search) {
+    return WEBAPP_ROUTES.OAUTH_LOGIN;
+  }
+
+  return `${WEBAPP_ROUTES.OAUTH_LOGIN}${search.startsWith("?") ? search : `?${search}`}`;
+}
+
 export function buildOAuthLoginMagicLinkUrls(
   origin: string,
   search: string,
 ): { callbackURL: string; errorCallbackURL: string } {
   const query = searchWithoutTransientAuthErrors(search);
   const callbackURL = new URL("/oauth/consent", origin);
-  const errorCallbackURL = new URL("/oauth/login", origin);
+  const errorCallbackURL = new URL(WEBAPP_ROUTES.OAUTH_LOGIN, origin);
   callbackURL.search = query;
   errorCallbackURL.search = query;
   return {

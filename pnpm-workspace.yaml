@@ -2,6 +2,17 @@ packages:
   - apps/*
   - packages/*
 
+# Pin pnpm via packageManager + CI/Docker, not the lockfile env document.
+# pnpm 12 records packageManagerDependencies by default, which makes
+# verify-deps-before-run treat a fresh install as stale on every `pnpm run`.
+# https://pnpm.io/lockfile
+pmOnFail: ignore
+verifyDepsBeforeRun: false
+# Node comes from nvm/.nvmrc, pnpm/setup, and Docker node:26-slim.
+# Recording `node@runtime` in the lockfile breaks turbo-prune then `pnpm prune`.
+runtime: false
+runtimeOnFail: ignore
+
 nodeLinker: hoisted
 autoInstallPeers: true
 linkWorkspacePackages: true
@@ -16,32 +27,34 @@ syncInjectedDepsAfterScripts:
 
 overrides:
   "@better-auth/core": "1.7.1"
-  "@react-email/ui": "6.9.1"
-  "@types/node": "26.1.2"
-  "@vitejs/plugin-react": "6.0.5"
-  react-email: "6.9.1"
-  tsx: "4.23.1"
-  "@tiptap/core": "3.29.2"
-  "@tiptap/extension-bubble-menu": "3.29.2"
-  "@tiptap/extension-color": "3.29.2"
-  "@tiptap/extension-emoji": "3.29.2"
-  "@tiptap/extension-floating-menu": "3.29.2"
-  "@tiptap/extension-highlight": "3.29.2"
-  "@tiptap/extension-link": "3.29.2"
-  "@tiptap/extension-list": "3.29.2"
-  "@tiptap/extension-mention": "3.29.2"
-  "@tiptap/extension-placeholder": "3.29.2"
-  "@tiptap/extension-task-item": "3.29.2"
-  "@tiptap/extension-task-list": "3.29.2"
-  "@tiptap/extension-text-style": "3.29.2"
-  "@tiptap/extensions": "3.29.2"
-  "@tiptap/pm": "3.29.2"
-  "@tiptap/react": "3.29.2"
-  "@tiptap/starter-kit": "3.29.2"
-  "@tiptap/suggestion": "3.29.2"
-  next: "16.3.1"
-  postcss: "^8.5.17"
-  zod-openapi: "^6.0.0"
+  "@react-email/ui": "6.9.5"
+  "@types/node": "26.5.0"
+  "@vitejs/plugin-react": "6.1.1"
+  react-email: "6.9.5"
+  tsx: "4.23.13"
+  "@tiptap/core": "3.31.3"
+  "@tiptap/extension-bubble-menu": "3.31.3"
+  "@tiptap/extension-color": "3.31.3"
+  "@tiptap/extension-emoji": "3.31.3"
+  "@tiptap/extension-floating-menu": "3.31.3"
+  "@tiptap/extension-highlight": "3.31.3"
+  "@tiptap/extension-link": "3.31.3"
+  "@tiptap/extension-list": "3.31.3"
+  "@tiptap/extension-mention": "3.31.3"
+  "@tiptap/extension-placeholder": "3.31.3"
+  "@tiptap/extension-task-item": "3.31.3"
+  "@tiptap/extension-task-list": "3.31.3"
+  "@tiptap/extension-text-style": "3.31.3"
+  "@tiptap/extensions": "3.31.3"
+  "@tiptap/pm": "3.31.3"
+  "@tiptap/react": "3.31.3"
+  "@tiptap/starter-kit": "3.31.3"
+  "@tiptap/suggestion": "3.31.3"
+  next: "16.3.4"
+  postcss: "^8.5.28"
+  rolldown: "1.2.7"
+  esbuild: "0.28.2"
+  zod-openapi: "^6.0.2"
 
 allowBuilds:
   "@parcel/watcher": true
@@ -53,5 +66,6 @@ allowBuilds:
   lefthook: true
   prisma: true
   protobufjs: true
+  react-native-enriched-markdown: true
   sharp: true
   spawn-sync: true

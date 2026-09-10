@@ -1,5 +1,6 @@
 {
   "Approve": "Genehmigen",
+  "ChromeExtensionClientName": "Bondery Chrome-Erweiterung",
   "Deny": "Ablehnen",
   "Description": "{clientName} möchte auf dein Bondery-Konto zugreifen.",
   "ErrorTitle": "Autorisierungsfehler",

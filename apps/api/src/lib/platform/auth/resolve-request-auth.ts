@@ -8,7 +8,7 @@ import type { FastifyRequest } from "fastify";
 import type { JWTPayload } from "jose";
 import {
   auth,
-  resolveApiResourceIdentifier,
+  resolveApiResourceAudience,
   resolveOAuthIssuerIdentifier,
   resolveTrustedOAuthClientIds,
 } from "../../auth/index.js";
@@ -75,7 +75,7 @@ export async function resolveOAuthBearerUser(token: string): Promise<ResolvedAut
     payload = await oauthResourceActions.verifyBearerToken(token, {
       requiredScopes: ["api:access"],
       verifyOptions: {
-        audience: resolveApiResourceIdentifier(),
+        audience: resolveApiResourceAudience(),
         issuer: resolveOAuthIssuerIdentifier(),
       },
     });

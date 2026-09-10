@@ -50,12 +50,13 @@
       return { error: "no csrf" };
     }
     const r = await fetch(`https://www.linkedin.com${path}`, {
-      credentials: "same-origin",
+      credentials: "include",
       headers: {
         accept: "application/vnd.linkedin.normalized+json+2.1",
         "csrf-token": csrf,
         "x-restli-protocol-version": "2.0.0",
       },
+      referrer: location.href,
     });
     if (!r.ok) {
       return { error: r.status };

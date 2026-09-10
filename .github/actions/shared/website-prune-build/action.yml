@@ -9,15 +9,9 @@ runs:
   steps:
     - name: Prune monorepo for website
       shell: bash
-      run: pnx turbo@2.10.4 prune website --docker
+      run: pnx turbo@2.10.12 prune website --docker
 
-    - name: Install pruned dependencies (manifests only)
-      shell: bash
-      run: |
-        cd out/json
-        pnpm install --frozen-lockfile --ignore-scripts --no-runtime
-
-    - name: Install pruned dependencies (full sources)
+    - name: Install pruned dependencies
       shell: bash
       run: |
         cp -r out/full/* out/json/

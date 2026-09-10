@@ -21,9 +21,12 @@ export function createPrismaPool(url: string): Pool {
   return new Pool({ connectionString: url });
 }
 
-function createPrismaClientFromPool(pool: Pool) {
+function createPrismaClientFromPool(pool: Pool): BasePrismaClient {
   const adapter = new PrismaPg(pool);
 
+  // Prisma 7.10 `$extends` + `$allModels` query hooks drop later model
+  // delegates from the inferred type (e.g. `passkey`). The extension is
+  // query-only, so the public surface stays the generated client.
   return new BasePrismaClient({ adapter }).$extends({
     query: {
       $allModels: {
@@ -41,10 +44,10 @@ function createPrismaClientFromPool(pool: Pool) {
         },
       },
     },
-  });
+  }) as unknown as BasePrismaClient;
 }
 
-export type PrismaClient = ReturnType<typeof createPrismaClientFromPool>;
+export type PrismaClient = BasePrismaClient;
 
 let prismaInstance: PrismaClient | null = globalForPrisma.prisma ?? null;
 

@@ -7,8 +7,10 @@
  * 3. Voyager dash REST API endpoints with CSRF auth
  * 4. Return [] so the caller falls back to SDUI DOM scraping
  *
- * The content script runs on linkedin.com, so both approaches have full
- * cookie / same-origin access.
+ * Isolated-world `fetch` is extension-origin (`chrome-extension://…`), not the
+ * LinkedIn page. `credentials: "same-origin"` therefore omits `li_at` /
+ * `JSESSIONID` and Voyager returns empty. Use `include` so host_permissions
+ * send the page session cookies.
  */
 
 export { fetchFullEducation } from "./fetchDetails/educationFetch";

@@ -55,7 +55,7 @@ Display names use ASCII hyphens (for example `Stage - Webapp`) because GitHub re
 
 **Branch protection:** `.github/rulesets/protect-main.json` sets `strict_required_status_checks_policy: true` so PRs must be up to date with `main` before merge. Apply with `pnpm run github:rulesets -- main`.
 
-**Node on runners:** Host jobs pin Node 26 via `devEngines.runtime` in root `package.json` (`pnpm/setup@v1` reads it and installs the runtime). Production Docker images use `node:26-slim` with `pnpm install --no-runtime` (Node is already in the image). Host CI uses the shared `setup-pnpm` composite (`pnpm/setup` + `pnpm ci`); pnpm version comes from `packageManager` (`pnpm@11.18.0`). Docker builder stages install pnpm globally (`npm install -g pnpm@11.18.0`) — Node 25+ does not ship corepack.
+**Node on runners:** Host jobs pin Node 26 via `devEngines.runtime` in root `package.json` (`pnpm/setup@v1` reads it and installs the runtime). Production Docker images use `node:26-slim` with `pnpm install --no-runtime` (Node is already in the image). Host CI uses the shared `setup-pnpm` composite (`pnpm/setup` + `pnpm ci`); pnpm version comes from `packageManager` (`pnpm@12.4.0`). Docker builder stages install pnpm globally (`npm install -g pnpm@12.4.0`) — Node 25+ does not ship corepack.
 
 **Dokploy webhooks** (Infisical **production** via OIDC):
 
@@ -80,7 +80,7 @@ Workflows fetch production secrets with `infisical-production-secrets`. Empty we
 
 **Verify path filters:** `website-build` runs when marketing-site paths change. `contract` always runs. API HTTP integration (`test:api`) is not in CI; run manually when changing routes if needed. Auth integration (`pnpm --filter api run test:auth`) is local-only until the suite is repaired.
 
-Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages use BuildKit cache mounts for the pnpm store (`id=bondery-pnpm-store-v3`): `pnpm install --no-runtime` after copying pruned manifests, then again after copying full sources. `--no-runtime` skips `devEngines.runtime` (Node is already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
+Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages copy pruned manifests and sources, then run a single `pnpm install --no-runtime` with a BuildKit cache mount for the pnpm store (`id=bondery-pnpm-store-v3`). The lockfile does not record `devEngines.runtime` (`runtime: false`); a second frozen install or `pnpm prune --prod` against a turbo-prune lockfile otherwise fails with `missing snapshot for node@runtime`. Next.js images skip `pnpm prune --prod` because pnpm 12 pacquet cannot restage a hoisted `node_modules` in Docker. `--no-runtime` skips downloading Node (already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
 
 ## Docker channels
 

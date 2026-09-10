@@ -11,6 +11,7 @@ import {
   extractSduiEducation,
   extractSduiIdentity,
   extractSduiWorkHistory,
+  getTopcard,
 } from "./sduiProfile";
 import type { WorkEntry } from "./workExperience";
 
@@ -98,6 +99,17 @@ export async function scrapeLinkedInProfile(
         ` ${educationHistory.length} edu (${fetchedEdu.length > 0 ? "voyager" : "dom"}),` +
         ` location=${voyagerLocation ? `"${voyagerLocation}"` : "none"}`,
     );
+
+    if (workHistory.length === 0 && educationHistory.length === 0) {
+      extLog.warn("[linkedin][scrape] empty work and education", {
+        handle,
+        hasIdentity: Boolean(identity),
+        hasJsessionId: /(?:^|;\s*)JSESSIONID=/.test(document.cookie),
+        hasTopcard: Boolean(getTopcard()),
+        voyagerEduEmpty: fetchedEdu.length === 0,
+        voyagerWorkEmpty: fetchedWork.length === 0,
+      });
+    }
 
     if (shouldCacheProfile(handle, cached)) {
       profileCache.set(cacheKey, cached);

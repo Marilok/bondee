@@ -20,8 +20,8 @@ export interface HelpButtonProps
   iconSize?: number;
   /** Tooltip text shown on hover. Used as the default aria-label unless `ariaLabel` is set. */
   label: string;
-  /** Width of the tooltip popover. Omit to use the theme default (300). */
-  tooltipMaxWidth?: TooltipProps["w"];
+  /** Max width of the tooltip popover. Omit to use the theme default (300). */
+  tooltipMaxWidth?: TooltipProps["maw"];
 }
 
 /**
@@ -77,7 +77,7 @@ export function HelpButton({
   );
 
   return (
-    <Tooltip label={label} {...(tooltipMaxWidth === undefined ? {} : { w: tooltipMaxWidth })}>
+    <Tooltip label={label} {...(tooltipMaxWidth === undefined ? {} : { maw: tooltipMaxWidth })}>
       {button}
     </Tooltip>
   );

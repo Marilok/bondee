@@ -67,11 +67,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           enforceContrast: false,
         },
       ],
-      "react-native-enriched-markdown",
     ],
     scheme: "bondery",
     slug: "bondery",
     userInterfaceStyle: "automatic",
-    version: "1.9.0",
+    version: "1.9.1",
   };
 };

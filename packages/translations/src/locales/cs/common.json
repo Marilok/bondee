@@ -181,6 +181,7 @@
     "apiTemporarilyUnavailable": "API je dočasně nedostupné. Zkuste to prosím znovu.",
     "apiUnreachable": "Server Bondery není dostupný. Zkuste to za chvíli znovu.",
     "auth": {
+      "ACCOUNT_NOT_FOUND": "Propojený účet se nenašel. Obnovte stránku a zkuste to znovu.",
       "AUTHENTICATION_FAILED": "Přihlášení přístupovým klíčem se nepovedlo. Zkuste to znovu, nebo pokračujte e-mailem, přes GitHub či LinkedIn.",
       "CHALLENGE_NOT_FOUND": "Přihlášení přístupovým klíčem se nedokončilo. Zkuste to znovu.",
       "CREDENTIAL_ACCOUNT_NOT_FOUND": "Pro tento účet nebylo nalezeno přihlášení heslem.",
@@ -199,7 +200,7 @@
       "PASSKEY_NOT_FOUND": "Žádný přístupový klíč se nenašel. Pokračujte e-mailem, přes GitHub nebo LinkedIn a poté přidejte přístupový klíč v Nastavení.",
       "PREVIOUSLY_REGISTERED": "Tento přístupový klíč už je k účtu přidaný.",
       "SESSION_EXPIRED": "Vaše relace vypršela. Přihlaste se prosím znovu.",
-      "SESSION_NOT_FRESH": "Relace je příliš stará na přidání přístupového klíče. Přihlaste se znovu přes GitHub nebo LinkedIn a zkuste to znovu.",
+      "SESSION_NOT_FRESH": "Relace je příliš stará na tuto akci. Přihlaste se znovu a zkuste to znovu.",
       "SESSION_REQUIRED": "Přihlaste se znovu přes GitHub nebo LinkedIn a poté přidejte přístupový klíč.",
       "SOCIAL_ACCOUNT_ALREADY_LINKED": "Tento sociální účet je již propojen s jiným uživatelem.",
       "TOKEN_EXPIRED": "Tento přihlašovací odkaz vypršel. Vyžádejte si nový.",

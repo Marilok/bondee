@@ -103,25 +103,41 @@ export function getTopcard(doc?: Document): Element | null {
 }
 
 /**
- * Parses the fsd_profile URN from the topcard componentkey.
- * e.g. "…refACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDswTopcard" → urn:li:fsd_profile:ACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDsw
+ * Parses the fsd_profile URN from an SDUI `componentkey` attribute value.
+ * e.g. "…refACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDswTopcard"
+ *   → urn:li:fsd_profile:ACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDsw
  */
-export function extractProfileUrnFromComponentKey(doc?: Document): string | null {
-  const topcard = getTopcard(doc);
-  const key = topcard?.getAttribute("componentkey");
+export function parseFsdProfileUrnFromComponentKey(key: string | null | undefined): string | null {
   if (!key) {
     return null;
   }
 
-  // Match ref(ACo…) followed by a section suffix (Topcard, About, etc.)
-  const match = key.match(
+  const withSuffix = key.match(
     /ref(ACo[A-Za-z0-9_-]+?)(?:Topcard|About|Experience|Education|Featured|Services|$)/,
   );
-  if (!match?.[1]) {
-    return null;
+  if (withSuffix?.[1]) {
+    return `urn:li:fsd_profile:${withSuffix[1]}`;
   }
 
-  return `urn:li:fsd_profile:${match[1]}`;
+  const embeddedUrn = key.match(/urn:li:fsd_profile:(ACo[A-Za-z0-9_-]+)/);
+  if (embeddedUrn?.[1]) {
+    return `urn:li:fsd_profile:${embeddedUrn[1]}`;
+  }
+
+  const bareAco = key.match(/(ACo[A-Za-z0-9_-]{20,})/);
+  if (bareAco?.[1]) {
+    return `urn:li:fsd_profile:${bareAco[1]}`;
+  }
+
+  return null;
+}
+
+/**
+ * Parses the fsd_profile URN from the topcard componentkey.
+ */
+export function extractProfileUrnFromComponentKey(doc?: Document): string | null {
+  const topcard = getTopcard(doc);
+  return parseFsdProfileUrnFromComponentKey(topcard?.getAttribute("componentkey"));
 }
 
 // ─── Identity ────────────────────────────────────────────────────────────────
@@ -153,7 +169,10 @@ export function extractSduiIdentity(doc?: Document): SduiIdentity | null {
     return null;
   }
 
-  const fullName = text(topcard.querySelector("h2"));
+  const fullName =
+    text(topcard.querySelector("h1")) ||
+    text(topcard.querySelector("h2")) ||
+    text(topcard.querySelector('[data-anonymize="person-name"]'));
   if (!fullName) {
     return null;
   }
@@ -213,15 +232,38 @@ export function extractSduiBio(doc?: Document): string | undefined {
 
 // ─── Work history ────────────────────────────────────────────────────────────
 
+function getExperienceSection(doc?: Document): Element | null {
+  const d = getDoc(doc);
+  return (
+    d.querySelector('[componentkey*="ExperienceTopLevelSection"]') ??
+    d.querySelector("section:has(#experience)") ??
+    d.querySelector("#experience")?.closest("section") ??
+    d.querySelector('[componentkey*="Experience"]')
+  );
+}
+
+function getEducationSection(doc?: Document): Element | null {
+  const d = getDoc(doc);
+  return (
+    d.querySelector('[componentkey*="EducationTopLevelSection"]') ??
+    d.querySelector("section:has(#education)") ??
+    d.querySelector("#education")?.closest("section") ??
+    d.querySelector('[componentkey*="Education"]')
+  );
+}
+
 export function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
-  const expSection = getDoc(doc).querySelector('[componentkey*="ExperienceTopLevelSection"]');
+  const expSection = getExperienceSection(doc);
   if (!expSection) {
     return [];
   }
 
   const entries: WorkEntry[] = [];
+  const items = expSection.querySelectorAll(
+    '[componentkey^="entity-collection-item-"], li.artdeco-list__item, div[data-view-name="profile-component-entity"]',
+  );
 
-  for (const item of expSection.querySelectorAll('[componentkey^="entity-collection-item-"]')) {
+  for (const item of items) {
     const texts = leafTexts(item);
     if (!texts.length) {
       continue;
@@ -268,7 +310,7 @@ export function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
 // ─── Education ───────────────────────────────────────────────────────────────
 
 export function extractSduiEducation(doc?: Document): EducationEntry[] {
-  const eduSection = getDoc(doc).querySelector('[componentkey*="EducationTopLevelSection"]');
+  const eduSection = getEducationSection(doc);
   if (!eduSection) {
     return [];
   }
@@ -333,7 +375,8 @@ export async function ensureProfileSectionsLoaded(
   timeoutMs = 8000,
 ): Promise<boolean> {
   const d = getDoc(doc);
-  const selector = '[componentkey*="ExperienceTopLevelSection"]';
+  const selector =
+    '[componentkey*="ExperienceTopLevelSection"], section:has(#experience), #experience';
 
   if (d.querySelector(selector)) {
     return true;

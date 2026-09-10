@@ -25,6 +25,7 @@ export function PersonAvatarTooltip({ person, children }: PersonAvatarTooltipPro
     <Tooltip
       closeDelay={50}
       label={<PersonCard person={person} size="md" />}
+      maw="none"
       offset={8}
       openDelay={120}
       position="top"

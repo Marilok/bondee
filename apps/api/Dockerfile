@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 FROM node:26-slim AS base
-RUN npm install -g pnpm@11.18.0
+RUN npm install -g pnpm@12.4.0
 WORKDIR /app
 ENV TURBO_TELEMETRY_DISABLED=1
 ENV CI=true
 
 FROM base AS prune
 COPY . .
-RUN pnx turbo@2.10.4 prune api --docker
+RUN pnx turbo@2.10.12 prune api --docker
 
 FROM base AS builder
 ARG TURBO_TEAM
@@ -17,11 +17,9 @@ ENV PNPM_HOME=/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
 ENV PNPM_STORE_DIR=/pnpm/store
 COPY --from=prune /app/out/json/ .
+COPY --from=prune /app/out/full/ .
 COPY --from=prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=prune /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
-RUN --mount=type=cache,id=bondery-pnpm-store-v3,target=/pnpm/store,sharing=locked \
-    pnpm install --frozen-lockfile --ignore-scripts --no-runtime --store-dir "${PNPM_STORE_DIR}"
-COPY --from=prune /app/out/full/ .
 COPY scripts ./scripts
 COPY docs ./docs
 RUN --mount=type=cache,id=bondery-pnpm-store-v3,target=/pnpm/store,sharing=locked \

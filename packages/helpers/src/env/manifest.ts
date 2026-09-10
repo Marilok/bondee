@@ -1188,7 +1188,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
       value: "lpcmokfekjjejnpobhbkgmjkodfhpmha",
     },
     description:
-      "Chrome Web Store extension ID. Used to derive the https://{id}.chromiumapp.org/ redirect URI registered for the extension's OAuth client (see scripts/provision-oauth-clients.ts).",
+      "Chrome Web Store extension ID. Derives the https://{id}.chromiumapp.org/ OAuth redirect URI and allows chrome-extension://{id} CORS on the authorization server.",
     exampleValue: "lpcmokfekjjejnpobhbkgmjkodfhpmha",
     group: "Infra",
     requiredIn: [],

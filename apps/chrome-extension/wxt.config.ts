@@ -3,10 +3,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
+import { CWS_EXTENSION_PUBLIC_KEY } from "./cws-public-key";
+import { loopbackHostPermissionPatterns } from "./src/lib/auth/oauth-urls";
 
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 
 // Helper to extract origin from URL for host permissions
 const getOrigin = (url: string) => {
@@ -51,7 +54,6 @@ export default defineConfig({
         return;
       }
 
-      const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
       if (wxt.config.mode === "production" && isCi) {
         const bakedUrls = [
           process.env.BONDERY_PUBLIC_API_URL,
@@ -75,21 +77,22 @@ export default defineConfig({
 
     const webappUrl = process.env.BONDERY_PUBLIC_WEBAPP_URL || DEV_URLS.webapp;
     const apiUrl = process.env.BONDERY_PUBLIC_API_URL || DEV_URLS.api;
+    const webappOrigin = getOrigin(webappUrl);
+    const apiOrigin = getOrigin(apiUrl);
 
-    // Build host permissions dynamically
+    // Loopback aliases so token fetch to 127.0.0.1 is privileged when env is
+    // localhost (and vice versa).
     const hostPermissions = [
-      "https://www.instagram.com/*",
-      "https://instagram.com/*",
-      "https://www.linkedin.com/*",
-      "https://linkedin.com/*",
-      "https://*.linkedin.com/*",
-      getOrigin(webappUrl),
+      ...new Set([
+        "https://www.instagram.com/*",
+        "https://instagram.com/*",
+        "https://www.linkedin.com/*",
+        "https://linkedin.com/*",
+        "https://*.linkedin.com/*",
+        ...loopbackHostPermissionPatterns(webappUrl),
+        ...(apiOrigin !== webappOrigin ? loopbackHostPermissionPatterns(apiUrl) : []),
+      ]),
     ];
-
-    // Add API URL if it is on a different origin than the webapp
-    if (getOrigin(apiUrl) !== getOrigin(webappUrl)) {
-      hostPermissions.push(getOrigin(apiUrl));
-    }
 
     return {
       // Action button configuration
@@ -110,6 +113,9 @@ export default defineConfig({
         48: "icons/icon48.png",
         128: "icons/icon128.png",
       },
+      // Local unpacked ID = Chrome Web Store ID so OAuth redirect_uri matches
+      // BONDERY_INFRA_CHROME_EXTENSION_ID. Store CI zips omit this; Google adds it.
+      ...(!isCi ? { key: CWS_EXTENSION_PUBLIC_KEY } : {}),
       name: "Bondery Extension",
 
       permissions: ["storage", "identity", "alarms"],
