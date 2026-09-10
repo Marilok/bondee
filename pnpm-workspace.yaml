@@ -49,6 +49,7 @@ overrides:
   next: "16.3.4"
   postcss: "^8.5.28"
   rolldown: "1.2.7"
+  esbuild: "0.28.2"
   zod-openapi: "^6.0.2"
 
 allowBuilds:
