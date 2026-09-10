@@ -8,7 +8,7 @@ ENV CI=true
 
 FROM base AS prune
 COPY . .
-RUN pnx turbo@2.10.4 prune api --docker
+RUN pnx turbo@2.10.12 prune api --docker
 
 FROM base AS builder
 ARG TURBO_TEAM

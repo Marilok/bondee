@@ -9,7 +9,7 @@ runs:
   steps:
     - name: Prune monorepo for website
       shell: bash
-      run: pnx turbo@2.10.4 prune website --docker
+      run: pnx turbo@2.10.12 prune website --docker
 
     - name: Install pruned dependencies (manifests only)
       shell: bash

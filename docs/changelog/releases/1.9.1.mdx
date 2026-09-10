@@ -27,4 +27,4 @@ title: "1.9.1"
 
 - Release smoke: Infisical staging env no longer overrides `BONDERY_INFRA_*_DOMAIN` into webapp `runtime-config.json`.
 - Contributors: `pnpm run` does not auto-install when `node_modules` looks stale (`verifyDepsBeforeRun: false`).
-- Docker: pin `esbuild` to `0.28.2` so turbo prune lockfiles keep a single Vite snapshot for frozen installs.
+- Docker: pin `esbuild` to `0.28.2` and prune with Turbo 2.10.12 so frozen installs keep Vite and `node@runtime` lockfile snapshots.
