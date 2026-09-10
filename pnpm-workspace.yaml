@@ -7,6 +7,7 @@ packages:
 # verify-deps-before-run treat a fresh install as stale on every `pnpm run`.
 # https://pnpm.io/lockfile
 pmOnFail: ignore
+verifyDepsBeforeRun: false
 
 nodeLinker: hoisted
 autoInstallPeers: true

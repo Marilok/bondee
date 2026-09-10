@@ -1,0 +1,29 @@
+---
+title: "1.9.1"
+---
+
+## [1.9.1] - 10.09.2026
+
+### 🐛 Fixed
+
+- Chrome extension: Unpacked sign-in completes OAuth (stable extension id, loopback resource identifier, consent page, and API CORS for `chrome-extension://`).
+- Chrome extension: LinkedIn scrape sends session cookies on Voyager requests (`credentials: "include"`) so work and education are no longer empty.
+- Webapp: Unlinking GitHub or LinkedIn in Settings uses the Better Auth account row id, so the action no longer fails with a generic error.
+- Webapp and website: Tooltips size to their label and wrap at 300px instead of stretching every tooltip to a fixed width.
+
+### 🔄 Changed
+
+- Website: The FAQ now says Bondery is free with core features and a premium tier for extras. It no longer describes the product as in beta.
+
+### 📦 Dependencies
+
+- Tooling: pnpm 12.4.0 (engines `>=12.4.0`), Turbo 2.10.12, Biome 2.5.12.
+- Webapp and website: Next.js 16.3.4, Mantine 9.6.0, Motion 13.
+- API: Fastify 5.12.3, `@fastify/formbody` 9, Nodemailer 10.0.1, Stripe 22.6.1, Vercel AI SDK 7.0.94.
+- Mobile: Expo 57.0.21, Tamagui 2.7.7, FlashList 2.3.2.
+- Chrome extension: WXT 0.21.4, web-ext 10.6.0.
+
+### 🤖 CI
+
+- Release smoke: Infisical staging env no longer overrides `BONDERY_INFRA_*_DOMAIN` into webapp `runtime-config.json`.
+- Contributors: `pnpm run` does not auto-install when `node_modules` looks stale (`verifyDepsBeforeRun: false`).
