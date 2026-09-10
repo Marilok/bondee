@@ -34,7 +34,7 @@ RUN --mount=type=cache,id=bondery-pnpm-store-v3,target=/pnpm/store,sharing=locke
 RUN --mount=type=secret,id=turbo_token \
     export TURBO_TOKEN="$(cat /run/secrets/turbo_token 2>/dev/null || true)" && \
     pnpm exec turbo build --filter=webapp --force
-RUN pnpm prune --prod --ignore-scripts
+# pnpm 12 cannot prune a hoisted node_modules tree in Docker.
 
 FROM node:26-slim AS runner
 WORKDIR /app
